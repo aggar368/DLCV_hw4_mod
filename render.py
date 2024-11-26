@@ -86,6 +86,9 @@ if __name__ == "__main__":
     args = get_combined_args(parser)
     print("Rendering " + args.model_path)
 
+    if args.all_eval_path is not None:
+        os.makedirs(args.all_eval_path, exist_ok=True)
+
     # Initialize system state (RNG)
     safe_state(args.quiet)
 

@@ -9,7 +9,7 @@
 # For inquiries contact  george.drettakis@inria.fr
 #
 
-from scene.cameras import Camera
+from scene.cameras import Camera, Easy_Camera
 import numpy as np
 from utils.graphics_utils import fov2focal
 from PIL import Image
@@ -71,6 +71,38 @@ def cameraList_from_camInfos(cam_infos, resolution_scale, args, is_nerf_syntheti
 
     for id, c in enumerate(cam_infos):
         camera_list.append(loadCam(args, id, c, resolution_scale, is_nerf_synthetic, is_test_dataset))
+
+    return camera_list
+
+def easy_cameraList_from_camInfos(cam_infos, resolution_scale, args, is_nerf_synthetic, is_test_dataset):
+    camera_list = []
+
+    if args.resolution in [1, 2, 4, 8]:
+        resolution = round(861/(resolution_scale * args.resolution)), round(478/(resolution_scale * args.resolution))
+    else:
+        if args.resolution == -1:
+            if 861 > 1600:
+                global WARNED
+                if not WARNED:
+                    print("[ INFO ] Encountered quite large input images (>1.6K pixels width), rescaling to 1.6K.\n "
+                        "If this is not desired, please explicitly specify '--resolution/-r' as 1")
+                    WARNED = True
+                global_down = 861 / 1600
+            else:
+                global_down = 1
+        else:
+            global_down = 861 / args.resolution
+    
+
+        scale = float(global_down) * float(resolution_scale)
+        resolution = (int(861 / scale), int(478 / scale))
+
+    for id, c in enumerate(cam_infos):
+        camera_list.append(Easy_Camera(resolution, colmap_id=c.uid, R=c.R, T=c.T, 
+                                       FoVx=c.FovX, FoVy=c.FovY, depth_params=c.depth_params,
+                                       invdepthmap=None,
+                                       image_name=c.image_name, uid=id, data_device=args.data_device,
+                                       train_test_exp=args.train_test_exp, is_test_dataset=is_test_dataset, is_test_view=c.is_test))
 
     return camera_list
 

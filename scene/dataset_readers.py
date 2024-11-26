@@ -142,7 +142,7 @@ def storePly(path, xyz, rgb):
     ply_data = PlyData([vertex_element])
     ply_data.write(path)
 
-def readColmapSceneInfo(path, images, depths, eval, train_test_exp, llffhold=8):
+def readColmapSceneInfo(path, images, depths, eval, train_test_exp, llffhold=8, all_eval_path=None):
     try:
         cameras_extrinsic_file = os.path.join(path, "sparse/0", "images.bin")
         cameras_intrinsic_file = os.path.join(path, "sparse/0", "cameras.bin")
@@ -153,6 +153,12 @@ def readColmapSceneInfo(path, images, depths, eval, train_test_exp, llffhold=8):
         cameras_intrinsic_file = os.path.join(path, "sparse/0", "cameras.txt")
         cam_extrinsics = read_extrinsics_text(cameras_extrinsic_file)
         cam_intrinsics = read_intrinsics_text(cameras_intrinsic_file)
+
+    if all_eval_path is not None:
+        eval_extrinsic_file = os.path.join(all_eval_path, "sparse/0", "images.txt")
+        eval_intrinsic_file = os.path.join(all_eval_path, "sparse/0", "cameras.txt")
+        eval_extrinsics = read_extrinsics_text(eval_extrinsic_file)
+        eval_intrinsics = read_intrinsics_text(eval_intrinsic_file)
 
     depth_params_file = os.path.join(path, "sparse/0", "depth_params.json")
     ## if depth_params_file isnt there AND depths file is here -> throw error
@@ -199,6 +205,15 @@ def readColmapSceneInfo(path, images, depths, eval, train_test_exp, llffhold=8):
 
     train_cam_infos = [c for c in cam_infos if train_test_exp or not c.is_test]
     test_cam_infos = [c for c in cam_infos if c.is_test]
+
+    if all_eval_path is not None:
+        eval_infos_unsorted = readColmapCameras(
+            cam_extrinsics=eval_extrinsics, cam_intrinsics=eval_intrinsics, depths_params=depths_params,
+            images_folder=os.path.join(all_eval_path, reading_dir),
+            depths_folder="", test_cam_names_list=[]
+        )
+        eval_infos = sorted(eval_infos_unsorted.copy(), key = lambda x : x.image_name)
+        test_cam_infos = [c for c in eval_infos]
 
     nerf_normalization = getNerfppNorm(train_cam_infos)
 

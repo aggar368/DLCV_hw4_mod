@@ -94,7 +94,7 @@ class Easy_Camera(nn.Module):
                  trans=np.array([0.0, 0.0, 0.0]), scale=1.0, data_device = "cuda",
                  train_test_exp = False, is_test_dataset = False, is_test_view = False
                  ):
-        super(Camera, self).__init__()
+        super(Easy_Camera, self).__init__()
 
         self.uid = uid
         self.colmap_id = colmap_id

@@ -56,16 +56,16 @@ def render_test(render_path, views, gaussians, pipeline, background, train_test_
 
         torchvision.utils.save_image(rendering, os.path.join(render_path, view.image_name))
 
-def render_sets(dataset : ModelParams, iteration : int, pipeline : PipelineParams, skip_train : bool, skip_test : bool, separate_sh: bool):
+def render_sets(dataset : ModelParams, iteration : int, pipeline : PipelineParams, skip_train : bool, skip_test : bool, separate_sh: bool, all_eval_path=None):
     with torch.no_grad():
         gaussians = GaussianModel(dataset.sh_degree)
-        scene = Scene(dataset, gaussians, load_iteration=iteration, shuffle=False)
+        scene = Scene(dataset, gaussians, load_iteration=iteration, shuffle=False, all_eval_path=all_eval_path)
 
         bg_color = [1,1,1] if dataset.white_background else [0, 0, 0]
         background = torch.tensor(bg_color, dtype=torch.float32, device="cuda")
 
-        if args.all_eval_path:
-            render_test(args.all_eval_path, scene.getTestCameras(), gaussians, pipeline, background, dataset.train_test_exp, separate_sh)
+        if all_eval_path:
+            render_test(all_eval_path, scene.getTestCameras(), gaussians, pipeline, background, dataset.train_test_exp, separate_sh)
         else:
             if not skip_train:
                 render_set(dataset.model_path, "train", scene.loaded_iter, scene.getTrainCameras(), gaussians, pipeline, background, dataset.train_test_exp, separate_sh)
@@ -92,4 +92,4 @@ if __name__ == "__main__":
     # Initialize system state (RNG)
     safe_state(args.quiet)
 
-    render_sets(model.extract(args), args.iteration, pipeline.extract(args), args.skip_train, args.skip_test, SPARSE_ADAM_AVAILABLE)
+    render_sets(model.extract(args), args.iteration, pipeline.extract(args), args.skip_train, args.skip_test, SPARSE_ADAM_AVAILABLE, args.all_eval_path)

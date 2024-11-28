@@ -83,7 +83,7 @@ class OptimizationParams(ParamGroup):
         self.scaling_lr = 0.005
         self.rotation_lr = 0.001
         self.exposure_lr_init = 0.01
-        self.exposure_lr_final = 0.00005 #0.001
+        self.exposure_lr_final = 0.0001 #0.001
         self.exposure_lr_delay_steps = 0
         self.exposure_lr_delay_mult = 0.0
         self.percent_dense = 0.01

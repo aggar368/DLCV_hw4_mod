@@ -117,12 +117,16 @@ def readColmapCameras(cam_extrinsics, cam_intrinsics, depths_params, images_fold
     sys.stdout.write('\n')
     return cam_infos
 
-def fetchPly(path):
+def fetchPly(path, random_pcd=False):
     plydata = PlyData.read(path)
     vertices = plydata['vertex']
     positions = np.vstack([vertices['x'], vertices['y'], vertices['z']]).T
     colors = np.vstack([vertices['red'], vertices['green'], vertices['blue']]).T / 255.0
     normals = np.vstack([vertices['nx'], vertices['ny'], vertices['nz']]).T
+    if random_pcd:
+        positions = np.random.uniform(low=np.min(positions), high=np.max(positions), size=positions.shape)
+        normals = np.random.uniform(low=np.min(normals), high=np.max(normals), size=normals.shape)
+        colors = np.random.uniform(low=np.min(colors), high=np.max(colors), size=colors.shape)
     return BasicPointCloud(points=positions, colors=colors, normals=normals)
 
 def storePly(path, xyz, rgb):
@@ -142,7 +146,7 @@ def storePly(path, xyz, rgb):
     ply_data = PlyData([vertex_element])
     ply_data.write(path)
 
-def readColmapSceneInfo(path, images, depths, eval, train_test_exp, llffhold=8, all_eval_path=None):
+def readColmapSceneInfo(path, images, depths, eval, train_test_exp, llffhold=8, all_eval_path=None, random_pcd=False):
     try:
         cameras_extrinsic_file = os.path.join(path, "sparse/0", "images.bin")
         cameras_intrinsic_file = os.path.join(path, "sparse/0", "cameras.bin")
@@ -228,7 +232,7 @@ def readColmapSceneInfo(path, images, depths, eval, train_test_exp, llffhold=8, 
             xyz, rgb, _ = read_points3D_text(txt_path)
         storePly(ply_path, xyz, rgb)
     try:
-        pcd = fetchPly(ply_path)
+        pcd = fetchPly(ply_path, random_pcd=random_pcd)
     except:
         pcd = None
 

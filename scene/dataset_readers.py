@@ -124,6 +124,7 @@ def fetchPly(path, random_pcd=False):
     colors = np.vstack([vertices['red'], vertices['green'], vertices['blue']]).T / 255.0
     normals = np.vstack([vertices['nx'], vertices['ny'], vertices['nz']]).T
     if random_pcd:
+        print("Initialize random point cloud")
         positions = np.random.uniform(low=np.min(positions), high=np.max(positions), size=positions.shape)
         normals = np.random.uniform(low=np.min(normals), high=np.max(normals), size=normals.shape)
         colors = np.random.uniform(low=np.min(colors), high=np.max(colors), size=colors.shape)
